@@ -2,9 +2,6 @@
                         PENSION DISTRIBUTION SYSTEM
 
 
-OVERVIEW
-
-
 
 STEPS:
 
@@ -22,4 +19,8 @@ STEPS:
     9.Serializer 
         a.validation creation for user registration
     10.View created
+
+    11. Created function to send email in views.py
+    
+
     
