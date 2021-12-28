@@ -12,4 +12,6 @@ STEPS:
         b.Added urls in urls.py and  views in views.py
     8.Model Created 
     9.Serializer 
+        a.validation creation for user registration
     10.View created
+    
