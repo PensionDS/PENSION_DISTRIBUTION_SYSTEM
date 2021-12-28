@@ -1,4 +1,6 @@
 STEPS:
+
+
     1.Create folder
     2.Create virtual enviornment and activate
     3.Install dependencies from requirements.txt
