@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework import status
 from . models import UserAccount
-
+from . import views
 
 # serializer for User Registration
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -14,7 +14,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'confirm_password' : {'write_only' : True}
         }
 
-    #validating all fields
+    # validating all fields
     def validate(self, attrs):
         username = attrs.get('username', '')
         phone_number = attrs.get('phone_number', '')
@@ -36,5 +36,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
+    
+        otp = views.generateOTP()
+        print(otp)
+     
         user = UserAccount.objects.create(**validated_data)
         return user
