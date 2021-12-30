@@ -136,5 +136,7 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 #for sms sending by twilo
-account_sid = config('account_sid')
-auth_token = config('auth_token')
+# account_sid = config('account_sid')
+# auth_token = config('auth_token')
+# account_sid='AC8e085108eedb178756e301aa355e3798'
+# auth_token='62402772197f7a5cbe172538ee45d10d'

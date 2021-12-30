@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework import status
 from . models import UserAccount
 import math, random
-from .sms import otp_by_sms, otp_by_email
+from .sms import  otp_by_email
 # serializer for User Registration
 class UserRegistrationSerializer(serializers.ModelSerializer):
 
@@ -53,7 +53,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         otp_by_email(validated_data['email_id'], OTP)
 
         # Calling function to send otp using sms
-        otp_by_sms(validated_data['phone_number'], OTP)
+        # otp_by_sms(OTP)
 
         user = UserAccount.objects.create(**validated_data)
         user.otp=OTP
