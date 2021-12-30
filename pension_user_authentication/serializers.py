@@ -3,7 +3,9 @@ from rest_framework import status
 from . models import UserAccount
 import math, random
 from .sms import otp_by_sms, otp_by_email
-# serializer for User Registration
+
+
+# Serializer for User Registration
 class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -36,8 +38,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
-       
-     
         # Function to generate OTP
         def generateOTP() :
             digits = "123456789"
@@ -60,3 +60,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.save()
         
         return user
+
+
+# Serializer for Account Activation
+class AccountActivationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserAccount
+        fields = ('id', 'otp')
+
+    def create(self, validated_data):
+        try:
+            user = UserAccount.objects.get(otp = validated_data['otp'])
+        
+            if user:
+                user.is_active=True
+                user.save()
+                return user
+        except:
+            raise serializers.ValidationError({'message' : ('Entered OTP is invalid!!Please enter the correct OTP.')})
+            # return 'Entered OTP is invalid!!Please enter the correct OTP.'
+        
+
