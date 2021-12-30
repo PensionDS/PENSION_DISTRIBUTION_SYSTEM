@@ -82,3 +82,19 @@ class AccountActivationSerializer(serializers.ModelSerializer):
             # return 'Entered OTP is invalid!!Please enter the correct OTP.'
         
 
+# Serializer for Login
+class UserLoginSerializer(serializers.ModelSerializer):
+    # email_id = serializers.EmailField(max_length=255, min_length=2)
+    # password = serializers.CharField(max_length=65, min_length=8, write_only=True)
+
+    class Meta:
+        model = UserAccount
+        fields = ('id', 'email_id', 'password')
+
+    # validating fields
+    # def validate(self, attrs):
+    #     email_id = attrs.get('email_id', '')
+    #     password = attrs.get('password', '')
+    #     print(email_id)
+    #     user = UserAccount.objects.get(email_id = email_id)
+    #     print(user)
