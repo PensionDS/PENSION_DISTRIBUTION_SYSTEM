@@ -54,7 +54,7 @@ class PensionUserLogin(generics.GenericAPIView):
         password = data.get('password',' ')
 
         try:
-            user = UserAccount.objects.get(email_id = email_id)
+            user = UserAccount.objects.get(email_id = email_id, password = password)
 
             if user:
                 # auth_token = jwt.encode({'email_id':user.email_id},'JWTSECRETKEYJWTSECRETKEYJWTSECRETKEY')
