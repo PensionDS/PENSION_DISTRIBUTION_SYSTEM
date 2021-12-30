@@ -18,13 +18,11 @@ def otp_by_email(email_id, otp):
 
 
 def otp_by_sms(phone_number, otp):
-    # account_sid = 'AC8e085108eedb178756e301aa355e3798'
-    # auth_token = '017b7cb6613a394b488bc0d0bbee7f12'
     account = settings.TWILIO_ACCOUNT_SID
     token = settings.TWILIO_AUTH_TOKEN
     client = Client(account, token)
     message = client.messages.create(
     body = f'Your Account verification OTP sended sucessfully. Use OTP to verify the account.'+otp,
-    from_ = f'+17194650389',
+    from_ = settings.TWILIO_FROM_,
     to = phone_number
     )
