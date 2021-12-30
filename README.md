@@ -21,6 +21,7 @@ STEPS:
     10.View created
 
     11. Created function to send email in views.py
+    12. Added functionality to send otp through sms and mail
     
 
     

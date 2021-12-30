@@ -53,7 +53,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         otp_by_email(validated_data['email_id'], OTP)
 
         # Calling function to send otp using sms
-        #otp_by_sms(validated_data['phone_number'], OTP)
+        otp_by_sms(validated_data['phone_number'], OTP)
 
         user = UserAccount.objects.create(**validated_data)
         user.otp=OTP
