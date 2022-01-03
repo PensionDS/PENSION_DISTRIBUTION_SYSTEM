@@ -26,3 +26,17 @@ def otp_by_sms(phone_number, otp):
     from_ = settings.TWILIO_FROM_,
     to = phone_number
     )
+
+
+def reset_password_by_email(email_id):
+    try:
+        send_mail(
+            subject = 'Reset Password Link',
+            message = 'To reset password to click the link and '+ 'http://127.0.0.1:8000/pension_user_authentication/change-password/' ,
+            from_email = settings.EMAIL_HOST_USER,
+            recipient_list=[email_id, ],
+            fail_silently=True,
+                )   
+        return True
+    except:
+        return False

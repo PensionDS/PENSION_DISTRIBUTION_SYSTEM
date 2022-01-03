@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework import status
 from . models import UserAccount
 import math, random
-from .sms import otp_by_sms, otp_by_email
+from .sms import otp_by_sms, otp_by_email, reset_password_by_email
 
 
 # Serializer for User Registration
@@ -99,3 +99,29 @@ class UserLoginSerializer(serializers.ModelSerializer):
     #     print(email_id)
     #     user = UserAccount.objects.get(email_id = email_id)
     #     print(user)
+
+
+# Serializer for ForgetPassword
+class UserForgetPasswordSerializer(serializers.Serializer):
+
+    email_id = serializers.EmailField(max_length = 254)
+    # class Meta:
+    #     model = UserAccount
+        
+
+    def validate_email_id(self, value):
+        # email_id = attrs.get('email_id', '')
+        print(value)
+        try:
+            user = UserAccount.objects.get(email_id = value)
+            print(user)
+            if not user:
+                raise serializers.ValidationError({'email_id' : ('this email is not registered')})
+            else:
+                reset_password_by_email(value) 
+        except:
+                raise serializers.ValidationError({'email_id' : ('this email registered')})
+
+    def save(self):
+       pass
+    
