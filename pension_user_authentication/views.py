@@ -69,3 +69,4 @@ class PensionUserLogin(generics.GenericAPIView):
                 return Response(data,status=status.HTTP_200_OK)
         except:
             return Response({'details':'Invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
+
