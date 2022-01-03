@@ -101,13 +101,10 @@ class PensionUserLogin(generics.GenericAPIView):
         except:
             return Response({'details':'Invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
 
-<<<<<<< HEAD
-=======
 
 
 class Home(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         content = {'message': 'Hello, World!'}
-        return Response(content)
->>>>>>> 2effea55f57343470fa8f3157a4c466647418721
+        content = {'message': 'Hello, World!'}
