@@ -50,10 +50,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         OTP=generateOTP()
         # Calling function to send otp using  email
-        otp_by_email(validated_data['email_id'], OTP)
+        #otp_by_email(validated_data['email_id'], OTP)
 
         # Calling function to send otp using sms
-        otp_by_sms(validated_data['phone_number'], OTP)
+        #otp_by_sms(validated_data['phone_number'], OTP)
 
         user = UserAccount.objects.create(**validated_data)
         user.otp=OTP
@@ -89,8 +89,8 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserAccount
-        #fields = ('id', 'email_id', 'password')
-        fields = ('id', 'email_id', 'password', 'username')
+        fields = ('id', 'email_id', 'password')
+        #fields = ('id', 'email_id', 'password', 'username')
 
     # validating fields
     # def validate(self, attrs):
@@ -124,4 +124,25 @@ class UserForgetPasswordSerializer(serializers.Serializer):
 
     def save(self):
        pass
-    
+
+
+# Serializer for Change Password
+class UserChangePasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length = 254)
+    confirm_password = serializers.CharField(max_length = 254)
+   
+    def validate(self, attrs):
+        password = attrs.get('password', '')
+        confirm_password = attrs.get('confirm_password', '')
+
+        if password != confirm_password:
+            raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
+        return super().validate(attrs)
+        
+    def update(self, instance, validated_data):
+        print(validated_data)
+        instance.password = validated_data.get('password', instance.password)
+        instance.confirm_password = validated_data.get('confirm_password', instance.confirm_password)
+        return instance
+    def save(self):
+        pass

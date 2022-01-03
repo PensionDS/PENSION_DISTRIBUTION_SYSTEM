@@ -9,6 +9,7 @@ urlpatterns = [
     path('user-login/', PensionUserLogin.as_view(), name = 'user-login'),
     path('forget-password/', PensionUserForgetPassword.as_view(), name = 'forget-password'),
     path('change-password/', PensionChangePassword.as_view(), name = 'change-password'),
+   
     
     path('home/', Home.as_view() ),
 

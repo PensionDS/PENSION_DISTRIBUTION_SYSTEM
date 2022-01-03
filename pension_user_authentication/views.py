@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from .models import UserAccount
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
- UserLoginSerializer, UserForgetPasswordSerializer
+ UserLoginSerializer, UserForgetPasswordSerializer, UserChangePasswordSerializer
 )
 from .utils import generate_access_token, generate_refresh_token, get_tokens_for_user
 
@@ -107,7 +107,8 @@ class Home(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         content = {'message': 'Hello, World!'}
-        content = {'message': 'Hello, World!'}
+        return Response(content)
+    
 
 
 # View for forget password
@@ -124,4 +125,12 @@ class PensionUserForgetPassword(generics.GenericAPIView):
 
 
 class PensionChangePassword(generics.GenericAPIView):
-    pass
+    serializer_class = UserChangePasswordSerializer
+    
+    def post(self, request, *args, **kwargs):
+        serializer = UserChangePasswordSerializer(data = request.data)
+        serializer.is_valid(raise_exception = True)
+        serializer.save()
+        return Response({
+            "message" : "Password changed successfully, please login with new password",
+            }, status = status.HTTP_200_OK)
