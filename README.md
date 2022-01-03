@@ -22,6 +22,20 @@ STEPS:
 
     11. Created function to send email in views.py
     12. Added functionality to send otp through sms and mail
-    
+
+    13. Login api
+        a. install simplejwt
+        b. add in settings.py, views.py
+        c. in project urls  
+
+        d. In views
+        in utils
+
+        e. In settings.py
+
+        Token Authentication
+            in installded apps 
+
+        f. Token generation is done
 
     

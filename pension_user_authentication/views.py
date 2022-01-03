@@ -1,10 +1,16 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from django.core.mail import send_mail
+from django.conf import settings
+import jwt
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.views import APIView
+
 from .models import UserAccount
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
  UserLoginSerializer
 )
+from .utils import generate_access_token, generate_refresh_token, get_tokens_for_user
+
 
 # View for User Registration
 class PensionUserRegister(generics.GenericAPIView):
@@ -38,35 +44,70 @@ class PensionUserActivation(generics.GenericAPIView):
 class PensionUserLogin(generics.GenericAPIView):
     serializer_class = UserLoginSerializer
 
-    # def post(self, request, *args, **kwargs):
-    #     serializer = UserLoginSerializer(data = request.data)
-    #     print(request.data)
-       
-    #     serializer.is_valid()
-    #     print(serializer.data)
-    #     return Response({
-    #         "token" : 'token'
-    #     })
+# 1.....
+    # def post(self, request):
+    #     data = request.data
+    #     email_id = data.get('email_id',' ')
+    #     password = data.get('password',' ')
 
+    #     try:
+    #         user = UserAccount.objects.get(email_id = email_id, password = password)
+    #         print(user.is_active)
+    #         if user:
+    #             if user.is_active:
+    #                 auth_token = jwt.encode({'email_id':user.email_id, 'password':user.password}, settings.JWT_SECRET_KEY)
+    #                 #auth_token = jwt.encode({'username':user.username, 'password':user.password}, settings.JWT_SECRET_KEY)
+    #                 serializer = UserLoginSerializer(user)
+
+    #                 data={
+    #                 'user': serializer.data,
+    #                 'token': auth_token
+    #                 }
+
+    #                 return Response(data,status=status.HTTP_200_OK)
+    #             else:
+    #                 return Response({'details':'Account is not activated yet, Please enter the OTP to activate your account'},status=status.HTTP_401_UNAUTHORIZED)
+    #     except:
+    #         return Response({'details':'Invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
+
+# 2.....
     def post(self, request):
         data = request.data
         email_id = data.get('email_id',' ')
         password = data.get('password',' ')
 
         try:
-            user = UserAccount.objects.get(email_id = email_id)
-
+            user = UserAccount.objects.get(email_id = email_id, password = password)
             if user:
-                # auth_token = jwt.encode({'email_id':user.email_id},'JWTSECRETKEYJWTSECRETKEYJWTSECRETKEY')
+                if user.is_active:
+                    serializer = UserLoginSerializer(user)
+                   
+                    #token = get_tokens_for_user(user)
+                    
+                    access_token = generate_access_token(user)
+                    refresh_token = generate_refresh_token(user)
+                                   
 
-                serializer = UserLoginSerializer(user)
+                    data={
+                    'user': serializer.data,
+                    'access_token': access_token,
+                    'refresh_token': refresh_token
+                    #'token': token
+                    }
 
-                data={
-                'user': serializer.data,
-                # 'token': auth_token
-                }
-
-                return Response(data,status=status.HTTP_200_OK)
+                    return Response(data,status=status.HTTP_200_OK)
+                else:
+                    return Response({'details':'Account is not activated yet, Please enter the OTP to activate your account'},status=status.HTTP_401_UNAUTHORIZED)
         except:
             return Response({'details':'Invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
 
+<<<<<<< HEAD
+=======
+
+
+class Home(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+>>>>>>> 2effea55f57343470fa8f3157a4c466647418721
