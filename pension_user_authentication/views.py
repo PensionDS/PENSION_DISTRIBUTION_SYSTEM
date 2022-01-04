@@ -27,7 +27,7 @@ class PensionUserRegister(generics.GenericAPIView):
 class PensionUserActivation(generics.GenericAPIView):
     serializer_class = AccountActivationSerializer
 
-    def post(self, request, args, *kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = AccountActivationSerializer(data = request.data)
         data = {}
         if serializer.is_valid():

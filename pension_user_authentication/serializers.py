@@ -8,7 +8,7 @@ from . models import UserAccountDetails
 
 # Serializer for User Registration
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    phone_number = serializers.IntegerField(write_only = True)
+    phone_number = serializers.CharField(write_only = True)
     confirm_password = serializers.CharField(write_only = True)
 
     class Meta:
@@ -26,8 +26,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password = attrs.get('password', '')
         confirm_password = attrs.get('confirm_password', '')
         
-        # if len(str(phone_number)) != 13:
-        #     raise serializers.ValidationError({'phone_number' : ('phone_number  is not valid')})
+        if len(phone_number) != 13:
+            raise serializers.ValidationError({'phone_number' : ('phone_number  is not valid')})
         
         if password != confirm_password:
             raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
@@ -46,12 +46,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         OTP = generateOTP()
 
-        # Calling function to send otp using  email
-        otp_by_email(validated_data['email'], OTP)
-
-        # Calling function to send otp using sms
-        # otp_by_sms(validated_data['phone_number'], OTP)
-
+       
         user = User.objects.create(
            username = validated_data['username'],
            email =validated_data['email'],
@@ -65,10 +60,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         user.set_password(validated_data['password'])
 
-        #otp_by_email(validated_data['email_id'], OTP)
-
+        # Calling function to send otp using  email
+        otp_by_email(validated_data['email'], OTP)
+       
         # Calling function to send otp using sms
-        #otp_by_sms(validated_data['phone_number'], OTP)
+        otp_by_sms(validated_data['phone_number'], OTP)
+
 
         user.save()
         userreg.save()
