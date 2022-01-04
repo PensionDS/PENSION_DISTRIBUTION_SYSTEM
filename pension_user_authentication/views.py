@@ -1,21 +1,13 @@
-from rest_framework import generics, status
-from rest_framework.response import Response
-from django.conf import settings
-import jwt
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.views import APIView
-from django.views.generic import CreateView
-from .models import  UserAccountDetails
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
+TokenGenerationSerializer)
 
- UserLoginSerializer, MyTokenObtainPairSerializer, # UserForgetPasswordSerializer, #UserRegister
 
- UserLoginSerializer, UserForgetPasswordSerializer, UserChangePasswordSerializer
 
-)
-from .utils import generate_access_token, generate_refresh_token, get_tokens_for_user
-from django.contrib.auth.models import User
-from rest_framework import viewsets
 # View for User Registration
 class PensionUserRegister(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
@@ -35,7 +27,7 @@ class PensionUserRegister(generics.GenericAPIView):
 class PensionUserActivation(generics.GenericAPIView):
     serializer_class = AccountActivationSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, args, *kwargs):
         serializer = AccountActivationSerializer(data = request.data)
         data = {}
         if serializer.is_valid():
@@ -45,143 +37,15 @@ class PensionUserActivation(generics.GenericAPIView):
             data = serializer.errors
         return Response(data)
        
+# View for Token generation
+class TokenGenerationView(TokenObtainPairView):
+    permission_classes = (AllowAny,)
+    serializer_class = TokenGenerationSerializer
 
-
-# # View for User Login
-# class PensionUserLogin(generics.GenericAPIView):
-#     serializer_class = UserLoginSerializer
-
-
-#     def post(self, request):
-#         data = request.data
-#         username = data.get('username',' ')
-#         password = data.get('password',' ')
-
-#         try:
-#             user = User.objects.get(username = username, password = password)
-#             print(user.is_active)
-#             if user:
-#                 if user.is_active:
-#                     auth_token = jwt.encode({'username':user.username, 'password':user.password}, settings.JWT_SECRET_KEY)
-#                     #auth_token = jwt.encode({'username':user.username, 'password':user.password}, settings.JWT_SECRET_KEY)
-#                     serializer = UserLoginSerializer(user)
-
-#                     data={
-#                     'user': serializer.data,
-#                     'token': auth_token
-#                     }
-
-#                     return Response(data,status=status.HTTP_200_OK)
-#                 else:
-#                     return Response({'details':'Account is not activated yet, Please enter the OTP to activate your account'},status=status.HTTP_401_UNAUTHORIZED)
-#         except:
-#             return Response({'details':'Invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
-
-# # 2.....
-#     def post(self, request):
-#         data = request.data
-#         email_id = data.get('email_id',' ')
-#         password = data.get('password',' ')
-
-#         try:
-#             user = UserAccount.objects.get(email_id = email_id, password = password)
-#             if user:
-#                 if user.is_active:
-#                     serializer = UserLoginSerializer(user)
-                   
-#                     #token = get_tokens_for_user(user)
-                    
-#                     access_token = generate_access_token(user)
-#                     refresh_token = generate_refresh_token(user)
-                                   
-
-#                     data={
-#                     'user': serializer.data,
-#                     'access_token': access_token,
-#                     'refresh_token': refresh_token
-#                     #'token': token
-#                     }
-
-#                     return Response(data,status=status.HTTP_200_OK)
-#                 else:
-#                     return Response({'details':'Account is not activated yet, Please enter the OTP to activate your account'},status=status.HTTP_401_UNAUTHORIZED)
-#         except:
-#             return Response({'details':'Invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
-
-
-
-
-# class Home(APIView):
-#     permission_classes = (IsAuthenticated,)
-#     def get(self, request):
-#         content = {'message': 'Hello, World!'}
-#         content = {'message': 'Hello, World!'}
-
+      
 class Home(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
     
-
-
-
-# # View for forget password
-# class PensionUserForgetPassword(generics.GenericAPIView):
-#     serializer_class = UserForgetPasswordSerializer
-    
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = UserForgetPasswordSerializer(data = request.data)
-#         serializer.is_valid(raise_exception = True)
-#         serializer.save()
-#         return Response({
-#             "message" : "To change your password, the link for reset paasword is send to yor email account",
-#             }, status = status.HTTP_200_OK)
-
-
-# class PensionChangePassword(generics.GenericAPIView):
-#     pass
-
-
-# # class UserRegistration(generics.GenericAPIView):
-
-       
-# #     serializer_class = UserRegister
-
-# #     def post(self, request):
-# #         serializer = UserRegister(data=request.data)
-# #         data = {}
-# #         if serializer.is_valid():
-# #             user = serializer.save()
-# #             data['response'] = "An otp has sent to the phone number  and verify  your account "
-# #         else:
-# #             data = serializer.errors
-# #         return Response(data)
-   
-   # View for Custom JWT token
-from rest_framework_simplejwt.views import TokenObtainPairView
-
-class customjwt(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = UserForgetPasswordSerializer(data = request.data)
-        serializer.is_valid(raise_exception = True)
-        serializer.save()
-        return Response({
-            "message" : "To change your password, the link for reset paasword is send to yor email account",
-            }, status = status.HTTP_200_OK)
-
-
-class PensionChangePassword(generics.GenericAPIView):
-    serializer_class = UserChangePasswordSerializer
-    
-    def post(self, request, *args, **kwargs):
-        serializer = UserChangePasswordSerializer(data = request.data)
-        serializer.is_valid(raise_exception = True)
-        serializer.save()
-        return Response({
-            "message" : "Password changed successfully, please login with new password",
-            }, status = status.HTTP_200_OK)
-
