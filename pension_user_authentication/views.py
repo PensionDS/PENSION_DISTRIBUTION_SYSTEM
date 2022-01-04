@@ -7,7 +7,11 @@ from rest_framework.views import APIView
 from django.views.generic import CreateView
 from .models import  UserAccountDetails
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
- UserLoginSerializer, MyTokenObtainPairSerializer # UserForgetPasswordSerializer, #UserRegister
+
+ UserLoginSerializer, MyTokenObtainPairSerializer, # UserForgetPasswordSerializer, #UserRegister
+
+ UserLoginSerializer, UserForgetPasswordSerializer, UserChangePasswordSerializer
+
 )
 from .utils import generate_access_token, generate_refresh_token, get_tokens_for_user
 from django.contrib.auth.models import User
@@ -106,17 +110,27 @@ class PensionUserActivation(generics.GenericAPIView):
 
 
 
+
 # class Home(APIView):
 #     permission_classes = (IsAuthenticated,)
 #     def get(self, request):
 #         content = {'message': 'Hello, World!'}
 #         content = {'message': 'Hello, World!'}
 
+class Home(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+    
+
+
 
 # # View for forget password
 # class PensionUserForgetPassword(generics.GenericAPIView):
 #     serializer_class = UserForgetPasswordSerializer
     
+
 #     def post(self, request, *args, **kwargs):
 #         serializer = UserForgetPasswordSerializer(data = request.data)
 #         serializer.is_valid(raise_exception = True)
@@ -150,3 +164,24 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 class customjwt(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserForgetPasswordSerializer(data = request.data)
+        serializer.is_valid(raise_exception = True)
+        serializer.save()
+        return Response({
+            "message" : "To change your password, the link for reset paasword is send to yor email account",
+            }, status = status.HTTP_200_OK)
+
+
+class PensionChangePassword(generics.GenericAPIView):
+    serializer_class = UserChangePasswordSerializer
+    
+    def post(self, request, *args, **kwargs):
+        serializer = UserChangePasswordSerializer(data = request.data)
+        serializer.is_valid(raise_exception = True)
+        serializer.save()
+        return Response({
+            "message" : "Password changed successfully, please login with new password",
+            }, status = status.HTTP_200_OK)
+

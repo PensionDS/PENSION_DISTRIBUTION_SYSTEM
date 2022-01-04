@@ -48,6 +48,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         OTP = generateOTP()
         # Calling function to send otp using  email
+
         otp_by_email(validated_data['email'], OTP)
 
         # Calling function to send otp using sms
@@ -63,6 +64,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             )
 
         user.set_password(validated_data['password'])
+
+        #otp_by_email(validated_data['email_id'], OTP)
+
+        # Calling function to send otp using sms
+        #otp_by_sms(validated_data['phone_number'], OTP)
+
+        user = UserAccount.objects.create(**validated_data)
+        user.otp=OTP
+
         user.save()
         userreg.save()
         
@@ -95,9 +105,15 @@ class UserLoginSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=65, min_length=8, write_only=True)
 
     class Meta:
+
         model = UserAccountDetails
         #fields = ('id', 'email_id', 'password')
         fields = ( 'username', 'password', )
+
+        model = UserAccount
+        fields = ('id', 'email_id', 'password')
+        #fields = ('id', 'email_id', 'password', 'username')
+
 
     # validating fields
     # def validate(self, attrs):
@@ -114,7 +130,6 @@ class UserLoginSerializer(serializers.ModelSerializer):
 #     email_id = serializers.EmailField(max_length = 254)
 #     # class Meta:
 #     #     model = UserAccount
-        
 
 #     def validate_email_id(self, value):
 #         # email_id = attrs.get('email_id', '')
@@ -147,3 +162,42 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         obj = UserAccount.objects.get(username='vishnu')
         data['obj'] = obj.username
         return(data)
+
+    def validate_email_id(self, value):
+        # email_id = attrs.get('email_id', '')
+        print(value)
+        try:
+            user = UserAccount.objects.get(email_id = value)
+            print(user)
+            if not user:
+                raise serializers.ValidationError({'email_id' : ('this email is not registered')})
+            else:
+                reset_password_by_email(value) 
+        except:
+                raise serializers.ValidationError({'email_id' : ('this email registered')})
+
+    def save(self):
+       pass
+
+
+# Serializer for Change Password
+class UserChangePasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length = 254)
+    confirm_password = serializers.CharField(max_length = 254)
+   
+    def validate(self, attrs):
+        password = attrs.get('password', '')
+        confirm_password = attrs.get('confirm_password', '')
+
+        if password != confirm_password:
+            raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
+        return super().validate(attrs)
+        
+    def update(self, instance, validated_data):
+        print(validated_data)
+        instance.password = validated_data.get('password', instance.password)
+        instance.confirm_password = validated_data.get('confirm_password', instance.confirm_password)
+        return instance
+    def save(self):
+        pass
+
