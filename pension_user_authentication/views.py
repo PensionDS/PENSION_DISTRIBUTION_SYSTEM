@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
-TokenGenerationSerializer)
+TokenGenerationSerializer, UserForgetPasswordSerializer, UserChangePasswordSerializer)
 
 
 
@@ -36,16 +36,47 @@ class PensionUserActivation(generics.GenericAPIView):
         else:
             data = serializer.errors
         return Response(data)
-       
+
+
 # View for Token generation
 class TokenGenerationView(TokenObtainPairView):
     permission_classes = (AllowAny,)
     serializer_class = TokenGenerationSerializer
 
-      
+
+# Home view      
 class Home(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
     
+
+# View for forget password
+class PensionUserForgetPassword(generics.GenericAPIView):
+    serializer_class = UserForgetPasswordSerializer
+    
+    def post(self, request, *args, **kwargs):
+        serializer = UserForgetPasswordSerializer(data = request.data)
+        data = {}
+        if serializer.is_valid(raise_exception = True):
+            serializer.save()
+            data['response'] = "To change your password, the link for reset paasword is send to yor email account"
+        else:
+            data = serializer.errors
+        return Response(data)
+
+
+class PensionChangePassword(generics.GenericAPIView):
+    serializer_class = UserChangePasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserChangePasswordSerializer(data = request.data)
+        data = {}
+        if serializer.is_valid(raise_exception = True):
+            serializer.save()
+            data['response'] = "Password changed successfully, please login with new password"
+        else:
+            data = serializer.errors
+        return Response(data)
+        

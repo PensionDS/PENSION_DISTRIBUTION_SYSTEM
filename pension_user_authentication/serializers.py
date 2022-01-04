@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 import math, random
-from .sms import otp_by_sms, otp_by_email
+from .sms import otp_by_sms, otp_by_email, reset_password_by_email
 from django.contrib.auth.models import User
 from . models import UserAccountDetails
 
@@ -26,7 +26,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password = attrs.get('password', '')
         confirm_password = attrs.get('confirm_password', '')
         
+
         if len(phone_number) != 13:
+
+       
+
             raise serializers.ValidationError({'phone_number' : ('phone_number  is not valid')})
         
         if password != confirm_password:
@@ -46,12 +50,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         OTP = generateOTP()
 
-       
+
         user = User.objects.create(
            username = validated_data['username'],
            email =validated_data['email'],
             )
-            
+
         userreg = UserAccountDetails.objects.create(
             user = user,
             phone_number = validated_data['phone_number'],
@@ -62,7 +66,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         # Calling function to send otp using  email
         otp_by_email(validated_data['email'], OTP)
-       
+
+
+
         # Calling function to send otp using sms
         otp_by_sms(validated_data['phone_number'], OTP)
 
@@ -98,4 +104,51 @@ class TokenGenerationSerializer(TokenObtainPairSerializer):
         token = super(TokenGenerationSerializer, cls).get_token(user)
 
         return token
+
+
+# Serializer for ForgetPassword
+class UserForgetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length = 254)
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+
+        try:
+            user = User.objects.get(email = email)
+
+            if  user:
+                # Calling function to send change password link through email
+                reset_password_by_email(email) 
+
+        except:
+                raise serializers.ValidationError({'email_id' : ('This email is not registered')})
+
+        return super().validate(attrs)
+
+    def save(self):
+       pass
+
+
+# Serializer for Change Password
+class UserChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length = 254)
+    new_password = serializers.CharField(max_length = 254)
+    confirm_password = serializers.CharField(max_length = 254)
+   
+    def validate(self, attrs):
+        old_password = attrs.get('old_password', '')
+        new_password = attrs.get('new_password', '')
+        confirm_password = attrs.get('confirm_password', '')
+
+        if new_password != confirm_password:
+            raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
+        return super().validate(attrs)
+        
+    def create(self, validated_data): 
+        #user = User.objects.get(password=validated_data['old_password'])
+        user = User.objects.get(username=validated_data['old_password'])
+
+        user.set_password(validated_data['new_password'])
+        user.save()
+        return user
 

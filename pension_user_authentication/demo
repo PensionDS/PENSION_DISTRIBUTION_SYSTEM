@@ -2,86 +2,13 @@
 
 #1.....
 
-# # Serializer for ForgetPassword
-# class UserForgetPasswordSerializer(serializers.Serializer):
 
-#     email_id = serializers.EmailField(max_length = 254)
-#     # class Meta:
-#     #     model = UserAccount
-
-#     def validate_email_id(self, value):
-#         # email_id = attrs.get('email_id', '')
-#         print(value)
-#         try:
-#             user = UserAccount.objects.get(email_id = value)
-#             print(user)
-#             if not user:
-#                 raise serializers.ValidationError({'email_id' : ('this email is not registered')})
-#             else:
-#                 reset_password_by_email(value) 
-#         except:
-#                 raise serializers.ValidationError({'email_id' : ('this email registered')})
-
-#     def save(self):
-#        pass
-
-
-#2......    
-# from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-# from rest_framework_simplejwt.views import TokenObtainPairView
-# class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-#     def validate(self, attrs):    
-#         data = super().validate(attrs)
-#        
-#         token = self.get_token(self.user)
-#         #print(token)
-#         data['user'] = str(self.user)
-#         data['id'] = self.user.id
-#         obj = UserAccountDetails.objects.get(username='vishnu')
-#         data['obj'] = obj.username
-#         return(data)
-
-#     def validate_email_id(self, value):
-#         # email_id = attrs.get('email_id', '')
-#         print(value)
-#         try:
-#             user = UserAccountDetails.objects.get(email_id = value)
-#             print(user)
-#             if not user:
-#                 raise serializers.ValidationError({'email_id' : ('this email is not registered')})
-#             else:
-#                 reset_password_by_email(value) 
-#         except:
-#                 raise serializers.ValidationError({'email_id' : ('this email registered')})
-
-#     def save(self):
-#        pass
 
 from django.views.generic.base import View
 
 
 3....
 
-# Serializer for Change Password
-class UserChangePasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(max_length = 254)
-    confirm_password = serializers.CharField(max_length = 254)
-   
-    def validate(self, attrs):
-        password = attrs.get('password', '')
-        confirm_password = attrs.get('confirm_password', '')
-
-        if password != confirm_password:
-            raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
-        return super().validate(attrs)
-        
-    def update(self, instance, validated_data):
-        print(validated_data)
-        instance.password = validated_data.get('password', instance.password)
-        instance.confirm_password = validated_data.get('confirm_password', instance.confirm_password)
-        return instance
-    def save(self):
-        pass
 
 
 
@@ -96,62 +23,10 @@ class UserChangePasswordSerializer(serializers.Serializer):
 VIEW 
 
 
-# # View for forget password
-# class PensionUserForgetPassword(generics.GenericAPIView):
-#     serializer_class = UserForgetPasswordSerializer
-    
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = UserForgetPasswordSerializer(data = request.data)
-#         serializer.is_valid(raise_exception = True)
-#         serializer.save()
-#         return Response({
-#             "message" : "To change your password, the link for reset paasword is send to yor email account",
-#             }, status = status.HTTP_200_OK)
-
 
 # class PensionChangePassword(generics.GenericAPIView):
 #     pass
 
 
-# # class UserRegistration(generics.GenericAPIView):
 
-       
-# #     serializer_class = UserRegister
-
-# #     def post(self, request):
-# #         serializer = UserRegister(data=request.data)
-# #         data = {}
-# #         if serializer.is_valid():
-# #             user = serializer.save()
-# #             data['response'] = "An otp has sent to the phone number  and verify  your account "
-# #         else:
-# #             data = serializer.errors
-# #         return Response(data)
-   
-   # View for Custom JWT token
-# from rest_framework_simplejwt.views import TokenObtainPairView
-
-# class customjwt(TokenObtainPairView):
-#     serializer_class = MyTokenObtainPairSerializer
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = UserForgetPasswordSerializer(data = request.data)
-#         serializer.is_valid(raise_exception = True)
-#         serializer.save()
-#         return Response({
-#             "message" : "To change your password, the link for reset paasword is send to yor email account",
-#             }, status = status.HTTP_200_OK)
-
-
-# class PensionChangePassword(generics.GenericAPIView):
-#     serializer_class = UserChangePasswordSerializer
-    
-#     def post(self, request, *args, **kwargs):
-#         serializer = UserChangePasswordSerializer(data = request.data)
-#         serializer.is_valid(raise_exception = True)
-#         serializer.save()
-#         return Response({
-#             "message" : "Password changed successfully, please login with new password",
-#             }, status = status.HTTP_200_OK)
 

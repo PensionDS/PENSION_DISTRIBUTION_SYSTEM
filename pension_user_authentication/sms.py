@@ -3,6 +3,8 @@ from django.conf import settings
 from twilio.rest import Client
 from django.contrib.auth.models import User
 
+
+# Function to send OTP through email
 def otp_by_email(email, otp):
     try:
         send_mail(
@@ -17,6 +19,7 @@ def otp_by_email(email, otp):
         return False
 
 
+# Function to send OTP through sms
 def otp_by_sms(phone_number, otp):
     account = settings.TWILIO_ACCOUNT_SID
     token = settings.TWILIO_AUTH_TOKEN
@@ -28,6 +31,7 @@ def otp_by_sms(phone_number, otp):
     )
 
 
+# Function to send link to change password
 def reset_password_by_email(email_id):
     try:
         send_mail(
