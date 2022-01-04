@@ -1,10 +1,9 @@
 from rest_framework import serializers
-from rest_framework import status
-from . models import UserAccountDetails
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 import math, random
-from .sms import otp_by_sms, otp_by_email, reset_password_by_email
+from .sms import otp_by_sms, otp_by_email
 from django.contrib.auth.models import User
-from rest_framework.response import Response
+from . models import UserAccountDetails
 
 
 # Serializer for User Registration
@@ -34,8 +33,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
         return super().validate(attrs)
 
-    def create(self, validated_data):
-        
+    def create(self, validated_data):        
         # Function to generate OTP
         def generateOTP() :
             digits = "123456789"
@@ -47,16 +45,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             return OTP
 
         OTP = generateOTP()
-        # Calling function to send otp using  email
 
+        # Calling function to send otp using  email
         otp_by_email(validated_data['email'], OTP)
 
         # Calling function to send otp using sms
         # otp_by_sms(validated_data['phone_number'], OTP)
+
         user = User.objects.create(
            username = validated_data['username'],
            email =validated_data['email'],
             )
+            
         userreg = UserAccountDetails.objects.create(
             user = user,
             phone_number = validated_data['phone_number'],
@@ -70,9 +70,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         # Calling function to send otp using sms
         #otp_by_sms(validated_data['phone_number'], OTP)
 
-        user = UserAccount.objects.create(**validated_data)
-        user.otp=OTP
-
         user.save()
         userreg.save()
         
@@ -81,7 +78,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 # Serializer for Account Activation
 class AccountActivationSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = UserAccountDetails
         fields = ('otp',)
@@ -96,108 +92,13 @@ class AccountActivationSerializer(serializers.ModelSerializer):
                 return user
         except:
             raise serializers.ValidationError({'message' : ('Entered OTP is invalid!!Please enter the correct OTP.')})
-            # return 'Entered OTP is invalid!!Please enter the correct OTP.'
         
 
-# Serializer for Login
-class UserLoginSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=255, min_length=2)
-    password = serializers.CharField(max_length=65, min_length=8, write_only=True)
+# Serializer for Token generation by extending TokenObtainPairSerializer
+class TokenGenerationSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super(TokenGenerationSerializer, cls).get_token(user)
 
-    class Meta:
-
-        model = UserAccountDetails
-        #fields = ('id', 'email_id', 'password')
-        fields = ( 'username', 'password', )
-
-        model = UserAccount
-        fields = ('id', 'email_id', 'password')
-        #fields = ('id', 'email_id', 'password', 'username')
-
-
-    # validating fields
-    # def validate(self, attrs):
-    #     email_id = attrs.get('email_id', '')
-    #     password = attrs.get('password', '')
-    #     print(email_id)
-    #     user = UserAccount.objects.get(email_id = email_id)
-    #     print(user)
-
-
-# # Serializer for ForgetPassword
-# class UserForgetPasswordSerializer(serializers.Serializer):
-
-#     email_id = serializers.EmailField(max_length = 254)
-#     # class Meta:
-#     #     model = UserAccount
-
-#     def validate_email_id(self, value):
-#         # email_id = attrs.get('email_id', '')
-#         print(value)
-#         try:
-#             user = UserAccount.objects.get(email_id = value)
-#             print(user)
-#             if not user:
-#                 raise serializers.ValidationError({'email_id' : ('this email is not registered')})
-#             else:
-#                 reset_password_by_email(value) 
-#         except:
-#                 raise serializers.ValidationError({'email_id' : ('this email registered')})
-
-#     def save(self):
-#        pass
-    
-    
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        #print(attrs)
-        data = super().validate(attrs)
-        #print(data)
-        token = self.get_token(self.user)
-        #print(token)
-        data['user'] = str(self.user)
-        data['id'] = self.user.id
-        obj = UserAccount.objects.get(username='vishnu')
-        data['obj'] = obj.username
-        return(data)
-
-    def validate_email_id(self, value):
-        # email_id = attrs.get('email_id', '')
-        print(value)
-        try:
-            user = UserAccount.objects.get(email_id = value)
-            print(user)
-            if not user:
-                raise serializers.ValidationError({'email_id' : ('this email is not registered')})
-            else:
-                reset_password_by_email(value) 
-        except:
-                raise serializers.ValidationError({'email_id' : ('this email registered')})
-
-    def save(self):
-       pass
-
-
-# Serializer for Change Password
-class UserChangePasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(max_length = 254)
-    confirm_password = serializers.CharField(max_length = 254)
-   
-    def validate(self, attrs):
-        password = attrs.get('password', '')
-        confirm_password = attrs.get('confirm_password', '')
-
-        if password != confirm_password:
-            raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
-        return super().validate(attrs)
-        
-    def update(self, instance, validated_data):
-        print(validated_data)
-        instance.password = validated_data.get('password', instance.password)
-        instance.confirm_password = validated_data.get('confirm_password', instance.confirm_password)
-        return instance
-    def save(self):
-        pass
+        return token
 
