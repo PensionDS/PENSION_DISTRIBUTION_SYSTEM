@@ -1,15 +1,15 @@
 from django.core.mail import send_mail
 from django.conf import settings
 from twilio.rest import Client
+from django.contrib.auth.models import User
 
-
-def otp_by_email(email_id, otp):
+def otp_by_email(email, otp):
     try:
         send_mail(
             subject = 'verification mail',
             message = 'Your Account verification OTP sended sucessfully. Use OTP to verify the account:'+ otp,
             from_email = settings.EMAIL_HOST_USER,
-            recipient_list=[email_id, ],
+            recipient_list=[email, ],
             fail_silently=True,
                 )   
         return True
