@@ -8,4 +8,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         exclude = ('user',)
         
-        

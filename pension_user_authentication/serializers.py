@@ -1,9 +1,9 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-import math, random
-from .sms import otp_by_sms, otp_by_email
-from django.contrib.auth.models import User
 from . models import UserAccountDetails
+from .sms import otp_by_sms, otp_by_email
+import math, random
 
 
 # Serializer for User Registration
@@ -25,11 +25,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         phone_number = attrs.get('phone_number', '')
         password = attrs.get('password', '')
         confirm_password = attrs.get('confirm_password', '')
-        
-
         if len(phone_number) != 13:
             raise serializers.ValidationError({'phone_number' : ('phone_number  is not valid')})
-        
         if password != confirm_password:
             raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
         return super().validate(attrs)
@@ -39,14 +36,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         def generateOTP() :
             digits = "123456789"
             OTP = ""
- 
             for i in range(5) :
                 OTP += digits[math.floor(random.random() * 9)]
-                
             return OTP
-
         OTP = generateOTP()
-
 
         user = User.objects.create(
            username = validated_data['username'],
@@ -64,21 +57,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         # Calling function to send otp using  email
         otp_by_email(validated_data['email'], OTP)
-
-
-
         # Calling function to send otp using sms
         otp_by_sms(validated_data['phone_number'], OTP)
 
-
         user.save()
         userreg.save()
-        
         return user
 
 
 # Serializer for Account Activation
 class AccountActivationSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = UserAccountDetails
         fields = ('otp',)
@@ -88,7 +77,6 @@ class AccountActivationSerializer(serializers.ModelSerializer):
             user =UserAccountDetails.objects.get(otp = validated_data['otp'])
             
             if user:
-                
                 user.is_active = True
                 user.save()
                 return user
@@ -101,18 +89,14 @@ class TokenGenerationSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super(TokenGenerationSerializer, cls).get_token(user)
-
         return token
 
 
 # Serializer for Change Password
-
-
-   
-    
 class ChangePasswordSerializer(serializers.Serializer):
-    model = User
+    
+    class Meta:
+        model = User
 
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
-

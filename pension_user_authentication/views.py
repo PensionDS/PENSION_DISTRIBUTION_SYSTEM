@@ -1,13 +1,13 @@
-from rest_framework.views import APIView
+from django.contrib.auth.models import User
 from rest_framework import generics
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django.contrib.auth.models import User
-from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
-    TokenGenerationSerializer, TokenGenerationSerializer, ChangePasswordSerializer)
+from rest_framework.views import APIView
 from .models import UserAccountDetails
-from django.contrib.auth.models import User
+from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
+    TokenGenerationSerializer, TokenGenerationSerializer, ChangePasswordSerializer
+    )
 
 
 # View for User Registration
@@ -35,9 +35,7 @@ class PensionUserActivation(generics.GenericAPIView):
         if serializer.is_valid():
             user = serializer.save()
             user =UserAccountDetails.objects.get(otp = request.data['otp'])
-           
             user_obj =User.objects.get(username = user.user)
-        
             user_obj.is_active = True
             user_obj.save()
             data['response'] = "Your account activated successfully by OTP, Please Login!!"
@@ -86,8 +84,5 @@ class PensionUserChangePassword(generics.UpdateAPIView):
                 'message': 'Password updated successfully',
                 'data': []
             }
-
             return Response(response)
-
         return Response(serializer.errors)
-

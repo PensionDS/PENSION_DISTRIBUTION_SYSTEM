@@ -1,7 +1,7 @@
-from django.core.mail import send_mail
 from django.conf import settings
-from twilio.rest import Client
+from django.core.mail import send_mail
 from django.contrib.auth.models import User
+from twilio.rest import Client
 
 
 # Function to send OTP through email
@@ -44,3 +44,4 @@ def reset_password_by_email(email_id):
         return True
     except:
         return False
+        

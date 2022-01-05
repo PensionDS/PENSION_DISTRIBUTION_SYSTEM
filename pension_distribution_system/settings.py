@@ -42,9 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_rest_passwordreset',
-
-    
-
 ]
 
 MIDDLEWARE = [
