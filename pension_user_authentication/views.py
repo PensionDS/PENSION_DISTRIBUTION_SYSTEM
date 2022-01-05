@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
 TokenGenerationSerializer, UserForgetPasswordSerializer, UserChangePasswordSerializer)
-
-
+from .models import UserAccountDetails
+from django.contrib.auth.models import User
 
 # View for User Registration
 class PensionUserRegister(generics.GenericAPIView):
@@ -32,6 +32,12 @@ class PensionUserActivation(generics.GenericAPIView):
         data = {}
         if serializer.is_valid():
             user = serializer.save()
+            user =UserAccountDetails.objects.get(otp = request.data['otp'])
+           
+            user_obj =User.objects.get(username = user.user)
+        
+            user_obj.is_active = True
+            user_obj.save()
             data['response'] = "Your account activated successfully by OTP, Please Login!!"
         else:
             data = serializer.errors

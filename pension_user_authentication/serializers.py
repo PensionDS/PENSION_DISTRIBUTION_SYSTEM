@@ -28,9 +28,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         
 
         if len(phone_number) != 13:
-
-       
-
             raise serializers.ValidationError({'phone_number' : ('phone_number  is not valid')})
         
         if password != confirm_password:
@@ -63,6 +60,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             )
 
         user.set_password(validated_data['password'])
+        user.is_active = False
 
         # Calling function to send otp using  email
         otp_by_email(validated_data['email'], OTP)
@@ -88,9 +86,10 @@ class AccountActivationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         try:
             user =UserAccountDetails.objects.get(otp = validated_data['otp'])
-        
+            
             if user:
-                user.is_active=True
+                
+                user.is_active = True
                 user.save()
                 return user
         except:
@@ -151,4 +150,3 @@ class UserChangePasswordSerializer(serializers.Serializer):
         user.set_password(validated_data['new_password'])
         user.save()
         return user
-
