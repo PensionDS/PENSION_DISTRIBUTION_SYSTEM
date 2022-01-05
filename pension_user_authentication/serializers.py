@@ -107,27 +107,9 @@ class TokenGenerationSerializer(TokenObtainPairSerializer):
 
 # Serializer for Change Password
 
-class UserChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField(max_length = 254)
-    new_password = serializers.CharField(max_length = 254)
-    confirm_password = serializers.CharField(max_length = 254)
+
    
-    def validate(self, attrs):
-        old_password = attrs.get('old_password', '')
-        new_password = attrs.get('new_password', '')
-        confirm_password = attrs.get('confirm_password', '')
-
-        if new_password != confirm_password:
-            raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
-        return super().validate(attrs)
-        
-    def create(self, validated_data): 
-        #user = User.objects.get(password=validated_data['old_password'])
-        user = User.objects.get(username=validated_data['old_password'])
-
-        user.set_password(validated_data['new_password'])
-        user.save()
-        return user
+    
 class ChangePasswordSerializer(serializers.Serializer):
     model = User
 

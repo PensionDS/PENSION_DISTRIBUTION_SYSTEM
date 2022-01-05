@@ -7,7 +7,7 @@ Django==3.2.10
 django-phonenumber-field==6.0.0
 django-rest-passwordreset==1.2.1
 djangorestframework==3.13.1
-djangorestframework-simplejwt==5.0.0
+
 drf-yasg==1.20.0
 djangorestframework-simplejwt==4.4.0
 idna==3.3
@@ -17,7 +17,7 @@ Jinja2==3.0.3
 MarkupSafe==2.0.1
 packaging==21.3
 phonenumbers==8.12.40
-PyJWT==2.3.0
+
 pyparsing==3.0.6
 phonenumberslite==8.12.40
 pkg-resources==0.0.0

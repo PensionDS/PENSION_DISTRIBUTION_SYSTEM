@@ -5,15 +5,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
-
-TokenGenerationSerializer, UserForgetPasswordSerializer, UserChangePasswordSerializer, 
-TokenGenerationSerializer, ChangePasswordSerializer)
+    TokenGenerationSerializer, TokenGenerationSerializer, ChangePasswordSerializer)
 from .models import UserAccountDetails
 from django.contrib.auth.models import User
-
-
-
-
 
 
 # View for User Registration
@@ -79,18 +73,6 @@ class PensionUserChangePassword(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         self.object = self.get_object()
         serializer = self.get_serializer(data=request.data)
-
-
-    def post(self, request, *args, **kwargs):
-        serializer = UserChangePasswordSerializer(data = request.data)
-        data = {}
-        if serializer.is_valid(raise_exception = True):
-            serializer.save()
-            data['response'] = "Password changed successfully, please login with new password"
-        else:
-            data = serializer.errors
-        return Response(data)
-        
 
         if serializer.is_valid():
             # Check old password
