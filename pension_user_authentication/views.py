@@ -3,10 +3,18 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.contrib.auth.models import User
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
-TokenGenerationSerializer, UserForgetPasswordSerializer, UserChangePasswordSerializer)
+
+TokenGenerationSerializer, UserForgetPasswordSerializer, UserChangePasswordSerializer, 
+TokenGenerationSerializer, ChangePasswordSerializer)
 from .models import UserAccountDetails
 from django.contrib.auth.models import User
+
+
+
+
+
 
 # View for User Registration
 class PensionUserRegister(generics.GenericAPIView):
@@ -58,23 +66,20 @@ class Home(APIView):
         return Response(content)
     
 
-# View for forget password
-class PensionUserForgetPassword(generics.GenericAPIView):
-    serializer_class = UserForgetPasswordSerializer
-    
-    def post(self, request, *args, **kwargs):
-        serializer = UserForgetPasswordSerializer(data = request.data)
-        data = {}
-        if serializer.is_valid(raise_exception = True):
-            serializer.save()
-            data['response'] = "To change your password, the link for reset paasword is send to yor email account"
-        else:
-            data = serializer.errors
-        return Response(data)
+# View for Change Password
+class PensionUserChangePassword(generics.UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    model = User
+    permission_classes = (IsAuthenticated,)
 
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
 
-class PensionChangePassword(generics.GenericAPIView):
-    serializer_class = UserChangePasswordSerializer
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
 
     def post(self, request, *args, **kwargs):
         serializer = UserChangePasswordSerializer(data = request.data)
@@ -86,3 +91,21 @@ class PensionChangePassword(generics.GenericAPIView):
             data = serializer.errors
         return Response(data)
         
+
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]})
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            response = {
+                'status': 'success',
+                'message': 'Password updated successfully',
+                'data': []
+            }
+
+            return Response(response)
+
+        return Response(serializer.errors)
+
