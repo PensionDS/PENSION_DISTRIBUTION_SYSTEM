@@ -38,4 +38,14 @@ STEPS:
 
         f. Token generation is done
 
+    14. Forgot password
+        a. install django_rest_passwordreset
+        b. add in settings
+        c. migrate
+        d. in project urls.py
+        e. in models.py
+
+    15. Change password
+        https://studygyaan.com/django/django-rest-framework-tutorial-change-password-and-reset-password
+
     
