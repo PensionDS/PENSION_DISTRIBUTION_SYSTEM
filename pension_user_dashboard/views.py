@@ -1,7 +1,9 @@
+from django.contrib.auth.models import User
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import UserProfile
+from .models import UserProfile, BookVerification
 from .serializers import ( UserProfileSerializer
 )
 
@@ -28,3 +30,17 @@ class PensionUserProfile(generics.GenericAPIView):
         else:
             data = serializer.errors
         return Response(data)
+
+    def put(self, request):
+        user = UserProfile.objects.get(user = request.user)
+        data = {}
+        serializer = UserProfileSerializer(user, data = request.data, partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            data['response'] = 'profile updated sucessfully'
+            # return Response(serializer.data) 
+            return Response(data)   
+        else:
+            data = serializer.errors
+        return Response(data)
+        

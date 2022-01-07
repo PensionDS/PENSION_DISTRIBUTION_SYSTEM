@@ -6,7 +6,7 @@ from django.db import models
 class UserAccountDetails(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
     phone_number = models.CharField(max_length = 13, null = False, blank = False)
-    otp = models.IntegerField(default = 00000)
+    otp = models.CharField(max_length = 5)
     is_active = models.BooleanField(default = False) 
     
     def __str__(self):

@@ -6,7 +6,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from .models import UserAccountDetails
 from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
-    TokenGenerationSerializer, TokenGenerationSerializer, ChangePasswordSerializer
+    TokenGenerationSerializer, TokenGenerationSerializer, ChangePasswordSerializer,
+    ResendOTPSerializer
     )
 
 
@@ -16,6 +17,21 @@ class PensionUserRegister(generics.GenericAPIView):
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            user = serializer.save()
+            data['response'] = "An otp has sent to the phone number  and verify  your account "
+        else:
+            data = serializer.errors
+        return Response(data)
+
+
+# View for ResendOTP
+class PensionResendOTP(generics.GenericAPIView):
+    serializer_class = ResendOTPSerializer
+
+    def post(self, request):
+        serializer = ResendOTPSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
             user = serializer.save()

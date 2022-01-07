@@ -34,10 +34,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):        
         # Function to generate OTP
         def generateOTP() :
-            digits = "123456789"
+            digits = "1234567890"
             OTP = ""
             for i in range(5) :
-                OTP += digits[math.floor(random.random() * 9)]
+                OTP += digits[math.floor(random.random() * 10)]
             return OTP
         OTP = generateOTP()
 
@@ -61,6 +61,37 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         otp_by_sms(validated_data['phone_number'], OTP)
 
         user.save()
+        userreg.save()
+        return user
+
+
+# Serializer for Resend OTP Verification
+class ResendOTPSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = User
+        fields = ('email',)
+
+    def validat(self, attrs):
+        email = attrs.get('email', '')
+        if not User.objects.get(email = email).exist(): 
+            raise serializers.ValidationError({'email' : ('email is not registered')})
+    
+    def create(self, validated_data):
+        def generateOTP() :
+            digits = "1234567890"
+            OTP = ""
+            for i in range(5) :
+                OTP += digits[math.floor(random.random() * 10)]
+            return OTP
+        OTP = generateOTP()
+        user = User.objects.get(email = validated_data['email'])
+        userreg = UserAccountDetails.objects.get(user = user)
+        userreg.otp = OTP
+            
+        # Calling function to send otp using  email
+        otp_by_email(validated_data['email'], OTP)
+
         userreg.save()
         return user
 
