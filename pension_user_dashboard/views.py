@@ -16,6 +16,7 @@ class PensionUserHome(generics.GenericAPIView):
         data = {}
         user = request.user
         data['user'] = user.username
+        print('hello')
         return Response(data)
 
 
