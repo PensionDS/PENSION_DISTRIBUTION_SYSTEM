@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import UserProfile, BookVerification, UserServiceStatus
+from .models import UserProfile, BookVerification, UserServiceStatus, UserAccountDetails
 from .serializers import ( UserProfileSerializer, UserBookVerificationSerializer,
     UserServiceStatusSerializer
 )
@@ -12,15 +13,17 @@ from .serializers import ( UserProfileSerializer, UserBookVerificationSerializer
 # View for User Home
 class PensionUserHome(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
+    
+    def get_queryset(self):
+        user = self.request.user
+        user1 = UserProfile.objects.filter(user = user)
+        print(user1)
+        return UserProfile.objects.filter(user = user)
+
     def get(self, request):
         data = {}
         user = request.user
         data['user'] = user.username
-        print('hello')
-        print('welocme')
-        print('hello2')
-        age=87
-        print(age)
         return Response(data)
         
 
@@ -46,6 +49,31 @@ class PensionUserStatus(generics.GenericAPIView):
 # View  for User Profile Completion and Update.
 class PensionUserProfile(generics.GenericAPIView):
     serializer_class = UserProfileSerializer
+    permission_class = (IsAuthenticated,)
+
+    def get(self, request):       
+        user = UserProfile.objects.get(user = request.user)
+        username = User.objects.get(username = request.user)
+        phone_number = UserAccountDetails.objects.get(user = request.user)
+        service_status = UserServiceStatus.objects.get(user = request.user)
+
+        data={}
+        account_data = {}
+
+        data['username'] = username.username
+        data['email'] = username.email
+        data['phone_number'] = phone_number.phone_number
+        data['DOB'] = user.DOB
+        data['Address'] = user.Address
+        data['LGA'] = user.LGA
+        data['Name_of_Next_of_Kln'] = user.Name_of_Next_of_Kln
+        data['Next_of_Kln_email_address'] = user.Next_of_Kln_email_address
+        data['Next_of_Kln_phone'] = user.Next_of_Kln_phone
+        data['Next_of_Kln_address'] = user.Next_of_Kln_address
+
+        account_data['service_status'] = service_status.service_status
+
+        return Response({"Basic Information " : data, "Account Information" : account_data })
 
     def post(self, request):
         serializer = UserProfileSerializer(data = request.data)
