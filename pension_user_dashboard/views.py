@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import UserProfile, BookVerification, UserServiceStatus, UserAccountDetails
+from .models import UserProfile, BookVerification, UserServiceStatus
+from pension_user_authentication.models import UserAccountDetails
 from .serializers import ( UserProfileSerializer, UserBookVerificationSerializer,
     UserServiceStatusSerializer
 )
@@ -46,7 +48,7 @@ class PensionUserStatus(generics.GenericAPIView):
         return Response(data)
 
 
-# View  for User Profile Completion and Update.
+# View  for User Profile Completion and Update and Display.
 class PensionUserProfile(generics.GenericAPIView):
     serializer_class = UserProfileSerializer
     permission_class = (IsAuthenticated,)
@@ -102,13 +104,32 @@ class PensionUserProfile(generics.GenericAPIView):
         if serializer.is_valid():
             serializer.save()
             data['response'] = 'profile updated sucessfully'
-            # return Response(serializer.data) 
             return Response(data)   
         else:
             data = serializer.errors
         return Response(data)
-        
 
+    def get(self, request):
+        user = UserProfile.objects.get(user = request.user)
+        username = User.objects.get(username = request.user)
+        phone_number = UserAccountDetails.objects.get(user = request.user)
+        service_status = UserServiceStatus.objects.get(user = request.user)
+        data={}
+        data['service_status'] = service_status.service_status
+        data['username'] = username.username
+        data['email'] = username.email
+        data['phone_number'] = phone_number.phone_number
+        data['DOB'] = user.DOB
+        data['Address'] = user.Address
+        data['LGA'] = user.LGA
+        data['Name_of_Next_of_Kln'] = user.Name_of_Next_of_Kln
+        data['Next_of_Kln_email_address'] = user.Next_of_Kln_email_address
+        data['Next_of_Kln_phone'] = user.Next_of_Kln_phone
+        data['Next_of_Kln_address'] = user.Next_of_Kln_address
+        return Response({'Profile Details' : data})
+
+
+# View for Book verification
 class PensionUserBookVerification(generics.GenericAPIView):
     serializer_class = UserBookVerificationSerializer
     permission_classes = (IsAuthenticated,)
@@ -121,7 +142,6 @@ class PensionUserBookVerification(generics.GenericAPIView):
                 Date = serializer.validated_data['Date'],
             )
             user.save()
-            # serializer.save()
             data['response'] = 'Book verification sucessfully done!'
         else:
             data = seralizer.errors

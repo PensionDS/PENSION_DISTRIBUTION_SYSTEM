@@ -21,7 +21,7 @@ class UserProfile(models.Model):
 # Model for Book Verification
 class BookVerification(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
-    Date = models.DateField(max_length = 8, null = False, blank = False)
+    Date = models.DateTimeField(max_length = 8, null = False, blank = False)
     is_verified = models.BooleanField(default = False)
 
     def __str__(self):
