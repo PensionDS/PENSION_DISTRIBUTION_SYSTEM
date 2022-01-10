@@ -39,7 +39,7 @@ class PensionUserStatus(generics.GenericAPIView):
         return Response(data)
 
 
-# View  for User Profile Completion and Update.
+# View  for User Profile Completion and Update and Display.
 class PensionUserProfile(generics.GenericAPIView):
     serializer_class = UserProfileSerializer
 
