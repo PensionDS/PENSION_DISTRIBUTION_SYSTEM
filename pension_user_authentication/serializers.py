@@ -105,7 +105,7 @@ class AccountActivationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         try:
-            user =UserAccountDetails.objects.get(otp = validated_data['otp'])
+            user = UserAccountDetails.objects.get(otp = validated_data['otp'])
             
             if user:
                 user.is_active = True

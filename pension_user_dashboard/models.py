@@ -22,4 +22,20 @@ class UserProfile(models.Model):
 class BookVerification(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
     Date = models.DateField(max_length = 8, null = False, blank = False)
-    Slot_time = models.CharField(max_length = 8, null= False, blank = False)
+    is_verified = models.BooleanField(default = False)
+
+    def __str__(self):
+        return self.user.username
+
+
+# Model for Service Status
+service_choice = (
+        ( "Active","Active"),
+        ("Retried", "Retried"),
+    )
+class UserServiceStatus(models.Model):
+    user  = models.OneToOneField(User, on_delete = models.CASCADE)
+    service_status = models.CharField(max_length = 10, choices = service_choice, default = None)
+
+    def __str__(self):
+        return self.user.username

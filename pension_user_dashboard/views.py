@@ -3,11 +3,42 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import UserProfile, BookVerification
-from .serializers import ( UserProfileSerializer
+from .models import UserProfile, BookVerification, UserServiceStatus
+from .serializers import ( UserProfileSerializer, UserBookVerificationSerializer,
+    UserServiceStatusSerializer
 )
 
-# View for UserProfile
+
+# View for User Home
+class PensionUserHome(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        data = {}
+        user = request.user
+        data['user'] = user.username
+        return Response(data)
+
+
+# View for User service status 
+class PensionUserStatus(generics.GenericAPIView):
+    serializer_class = UserServiceStatusSerializer
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        serializer = UserServiceStatusSerializer(data = request.data)
+        data = {}
+        if serializer.is_valid():
+            user = UserServiceStatus.objects.create(
+                user = request.user,
+                service_status = serializer.validated_data['service_status'],
+            )
+            user.save()
+            data['response'] = 'Service status added'
+        else:
+            data = serializer.errors
+        return Response(data)
+
+
+# View  for User Profile Completion and Update.
 class PensionUserProfile(generics.GenericAPIView):
     serializer_class = UserProfileSerializer
 
@@ -44,3 +75,21 @@ class PensionUserProfile(generics.GenericAPIView):
             data = serializer.errors
         return Response(data)
         
+
+class PensionUserBookVerification(generics.GenericAPIView):
+    serializer_class = UserBookVerificationSerializer
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        serializer = UserBookVerificationSerializer(data = request.data)
+        data = {}
+        if serializer.is_valid():
+            user = BookVerification.objects.create(
+                user = request.user,
+                Date = serializer.validated_data['Date'],
+            )
+            user.save()
+            # serializer.save()
+            data['response'] = 'Book verification sucessfully done!'
+        else:
+            data = seralizer.errors
+        return Response(data)
