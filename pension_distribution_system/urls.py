@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('pension_user_authentication/', include('pension_user_authentication.urls')),
     path('pension_user_dashboard/', include('pension_user_dashboard.urls')),
+    path('pension_user_notification/', include('pension_user_notification.urls')),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name ='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name ='token_refresh'),
     path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),

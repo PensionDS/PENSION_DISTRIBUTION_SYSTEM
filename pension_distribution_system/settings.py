@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'pension_user_authentication',
     'pension_user_dashboard',
+    'pension_user_notification',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_rest_passwordreset',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -151,3 +153,15 @@ REST_FRAMEWORK = {
 
 # JWT secret key
 JWT_SECRET_KEY=config('JWT_SECRET_KEY')
+
+# Channels
+ASGI_APPLICATION = 'pension_distribution_system.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
