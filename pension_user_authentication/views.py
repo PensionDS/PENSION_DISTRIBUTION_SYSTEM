@@ -102,3 +102,4 @@ class PensionUserChangePassword(generics.UpdateAPIView):
             }
             return Response(response)
         return Response(serializer.errors)
+
