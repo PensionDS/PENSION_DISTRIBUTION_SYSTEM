@@ -42,7 +42,7 @@ class PensionUserStatus(generics.GenericAPIView):
                 service_status = serializer.validated_data['service_status'],
             )
             user.save()
-            data['response'] = 'Service status added'
+            data['message'] = 'Service status added'
         else:
             data = serializer.errors
         return Response(data)
@@ -92,7 +92,7 @@ class PensionUserProfile(generics.GenericAPIView):
             Next_of_Kln_address = serializer.validated_data['Next_of_Kln_address'],
             )
             user.save()
-            data['response'] = 'fields added sucessfuly'
+            data['message'] = 'fields added sucessfuly'
         else:
             data = serializer.errors
         return Response(data)
@@ -103,7 +103,7 @@ class PensionUserProfile(generics.GenericAPIView):
         serializer = UserProfileSerializer(user, data = request.data, partial = True)
         if serializer.is_valid():
             serializer.save()
-            data['response'] = 'profile updated sucessfully'
+            data['message'] = 'profile updated sucessfully'
             return Response(data)   
         else:
             data = serializer.errors
@@ -142,7 +142,7 @@ class PensionUserBookVerification(generics.GenericAPIView):
                 Date = serializer.validated_data['Date'],
             )
             user.save()
-            data['response'] = 'Book verification sucessfully done!'
+            data['message'] = 'Book verification sucessfully done!'
         else:
             data = serializer.errors
         return Response(data)

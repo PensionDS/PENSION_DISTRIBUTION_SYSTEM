@@ -2,9 +2,9 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from . models import UserAccountDetails
-from .sms import otp_by_sms, otp_by_email
+from .email_sms_code import otp_by_sms, otp_by_email, resend_otp_by_email
 import math, random
-
+from django.contrib.auth import authenticate
 
 # Serializer for User Registration
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -21,16 +21,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
        
     # validating all fields
     def validate(self, attrs):
-        username = attrs.get('username', '')
+        email = attrs.get('email', '')
         phone_number = attrs.get('phone_number', '')
         password = attrs.get('password', '')
         confirm_password = attrs.get('confirm_password', '')
+        if User.objects.filter(email = email).exists():
+            raise serializers.ValidationError({'email' : ('email  is already registered')})
         if len(phone_number) != 13:
             raise serializers.ValidationError({'phone_number' : ('phone_number  is not valid')})
         if password != confirm_password:
             raise serializers.ValidationError({'password' : ('password mismatch, please enter same password')})
         return super().validate(attrs)
-
+        
+        
     def create(self, validated_data):        
         # Function to generate OTP
         def generateOTP() :
@@ -67,14 +70,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 # Serializer for Resend OTP Verification
 class ResendOTPSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = User
         fields = ('email',)
 
     def validat(self, attrs):
         email = attrs.get('email', '')
-        if not User.objects.get(email = email).exist(): 
+        if not User.objects.filter(email = email).exists(): 
             raise serializers.ValidationError({'email' : ('email is not registered')})
     
     def create(self, validated_data):
@@ -88,9 +90,10 @@ class ResendOTPSerializer(serializers.ModelSerializer):
         user = User.objects.get(email = validated_data['email'])
         userreg = UserAccountDetails.objects.get(user = user)
         userreg.otp = OTP
-            
+        
         # Calling function to send otp using  email
-        otp_by_email(validated_data['email'], OTP)
+
+        resend_otp_by_email(validated_data['email'], OTP, user.username)
 
         userreg.save()
         return user
@@ -98,7 +101,6 @@ class ResendOTPSerializer(serializers.ModelSerializer):
 
 # Serializer for Account Activation
 class AccountActivationSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = UserAccountDetails
         fields = ('otp',)
@@ -116,16 +118,26 @@ class AccountActivationSerializer(serializers.ModelSerializer):
         
 
 # Serializer for Token generation by extending TokenObtainPairSerializer
-class TokenGenerationSerializer(TokenObtainPairSerializer):
+class UserLoginSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
-        token = super(TokenGenerationSerializer, cls).get_token(user)
+        token = super(UserLoginSerializer, cls).get_token(user)
         return token
+
+    def validate(self, attrs):
+        username = attrs.get('username', '')
+        password = attrs.get('password', '')
+        user = authenticate(username=username, password=password)
+        if user is None:
+            raise serializers.ValidationError({'message':
+                ('A user with this email and password is not found.')}
+            )
+
+        return super().validate(attrs)
 
 
 # Serializer for Change Password
 class ChangePasswordSerializer(serializers.Serializer):
-    
     class Meta:
         model = User
 
