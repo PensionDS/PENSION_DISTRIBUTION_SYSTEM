@@ -1,14 +1,11 @@
 from django.contrib.auth.models import User
-from rest_framework import generics
-from rest_framework import permissions
+from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import UserProfile, BookVerification, UserServiceStatus, UserAccountDetails
-from .models import UserProfile, BookVerification, UserServiceStatus
+from .models import UserProfile, BookVerification, UserServiceStatus, UserAccountDetails, UserWalletDetails
 from pension_user_authentication.models import UserAccountDetails
 from .serializers import ( UserProfileSerializer, UserBookVerificationSerializer,
-    UserServiceStatusSerializer
+    UserServiceStatusSerializer, UserWalletDetailsSerializer
 )
 
 
@@ -26,7 +23,7 @@ class PensionUserHome(generics.GenericAPIView):
         data = {}
         user = request.user
         data['user'] = user.username
-        return Response(data)
+        return Response(data, status=status.HTTP_200_OK)
         
 
 # View for User service status 
@@ -45,7 +42,8 @@ class PensionUserStatus(generics.GenericAPIView):
             data['message'] = 'Service status added'
         else:
             data = serializer.errors
-        return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 # View  for User Profile Completion and Update and Display.
@@ -75,7 +73,7 @@ class PensionUserProfile(generics.GenericAPIView):
 
         account_data['service_status'] = service_status.service_status
 
-        return Response({"Basic Information " : data, "Account Information" : account_data })
+        return Response({"Basic Information " : data, "Account Information" : account_data }, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = UserProfileSerializer(data = request.data)
@@ -95,7 +93,8 @@ class PensionUserProfile(generics.GenericAPIView):
             data['message'] = 'fields added sucessfuly'
         else:
             data = serializer.errors
-        return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_201_CREATED)
 
     def put(self, request):
         user = UserProfile.objects.get(user = request.user)
@@ -107,26 +106,8 @@ class PensionUserProfile(generics.GenericAPIView):
             return Response(data)   
         else:
             data = serializer.errors
-        return Response(data)
-
-    def get(self, request):
-        user = UserProfile.objects.get(user = request.user)
-        username = User.objects.get(username = request.user)
-        phone_number = UserAccountDetails.objects.get(user = request.user)
-        service_status = UserServiceStatus.objects.get(user = request.user)
-        data={}
-        data['service_status'] = service_status.service_status
-        data['username'] = username.username
-        data['email'] = username.email
-        data['phone_number'] = phone_number.phone_number
-        data['DOB'] = user.DOB
-        data['Address'] = user.Address
-        data['LGA'] = user.LGA
-        data['Name_of_Next_of_Kln'] = user.Name_of_Next_of_Kln
-        data['Next_of_Kln_email_address'] = user.Next_of_Kln_email_address
-        data['Next_of_Kln_phone'] = user.Next_of_Kln_phone
-        data['Next_of_Kln_address'] = user.Next_of_Kln_address
-        return Response({'Profile Details' : data})
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 # View for Book verification
@@ -136,13 +117,38 @@ class PensionUserBookVerification(generics.GenericAPIView):
     def post(self, request):
         serializer = UserBookVerificationSerializer(data = request.data)
         data = {}
-        if serializer.is_valid():
-            user = BookVerification.objects.create(
-                user = request.user,
-                Date = serializer.validated_data['Date'],
-            )
-            user.save()
-            data['message'] = 'Book verification sucessfully done!'
+        user_balance = UserWalletDetails.objects.get(user = request.user)
+        balance = user_balance.balance
+        if balance < 100:
+            data['message'] = 'Book verification Failed, Insufficient account balance'
         else:
-            data = serializer.errors
-        return Response(data)
+            new_balance = balance - 100
+            user_balance.balance = new_balance
+            user_balance.save()
+            if serializer.is_valid():
+                user = BookVerification.objects.create(
+                    user = request.user,
+                    Date = serializer.validated_data['Date'],
+                )
+                user.save()
+                data['message'] = 'Book verification sucessfully done!'
+            else:
+                data = serializer.errors
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_200_OK)
+
+
+# checking wallet balance
+class WalletBalanceView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserWalletDetailsSerializer
+
+    def get(self, request):
+        data = {}
+        try:
+            user = UserWalletDetails.objects.get(user = request.user)
+            data['balance'] = user.balance
+            return Response(data, status = status.HTTP_200_OK)
+        except:
+            data['message'] = 'Wallet not activated! Please activate your account'
+            return Response(data, status = status.HTTP_400_BAD_REQUEST)

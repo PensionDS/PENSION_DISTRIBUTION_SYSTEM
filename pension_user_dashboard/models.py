@@ -20,7 +20,8 @@ class UserProfile(models.Model):
 
 # Model for Book Verification
 class BookVerification(models.Model):
-    user = models.OneToOneField(User, on_delete = models.CASCADE)
+    # user = models.OneToOneField(User, on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
     Date = models.DateTimeField(max_length = 8, null = False, blank = False)
     is_verified = models.BooleanField(default = False)
 
@@ -36,6 +37,14 @@ service_choice = (
 class UserServiceStatus(models.Model):
     user  = models.OneToOneField(User, on_delete = models.CASCADE)
     service_status = models.CharField(max_length = 10, choices = service_choice, default = None)
+
+    def __str__(self):
+        return self.user.username
+
+
+class UserWalletDetails(models.Model):
+    user = models.OneToOneField(User, on_delete = models.CASCADE)
+    balance = models.DecimalField(max_digits = 10, decimal_places = 2,default = 0.0)
 
     def __str__(self):
         return self.user.username

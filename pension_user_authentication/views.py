@@ -1,13 +1,12 @@
 from django.contrib.auth.models import User
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.views import APIView
 from .models import UserAccountDetails
-from .serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
-     UserLoginSerializer, ChangePasswordSerializer,
-    ResendOTPSerializer
+
+from . serializers import ( UserRegistrationSerializer, AccountActivationSerializer,
+        UserLoginSerializer, ChangePasswordSerializer, ResendOTPSerializer,  UserLoginSerializer
     )
 
 
@@ -23,7 +22,8 @@ class PensionUserRegister(generics.GenericAPIView):
             data['message'] = " An otp has sent to the phone number and email, Please verify  your account "
         else:
             data = serializer.errors
-        return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 # View for ResendOTP
@@ -38,14 +38,15 @@ class PensionResendOTP(generics.GenericAPIView):
             data['message'] = "An otp has sent to the phone number  and verify  your account "
         else:
             data = serializer.errors
-        return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 # View for Account Activation
 class PensionUserActivation(generics.GenericAPIView):
     serializer_class = AccountActivationSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         serializer = AccountActivationSerializer(data = request.data)
         data = {}
         if serializer.is_valid():
@@ -57,7 +58,8 @@ class PensionUserActivation(generics.GenericAPIView):
             data['message'] = "Your account activated successfully by OTP, Please Login!!"
         else:
             data = serializer.errors
-        return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 # View for Token generation
@@ -76,7 +78,7 @@ class PensionUserChangePassword(generics.UpdateAPIView):
         obj = self.request.user
         return obj
 
-    def update(self, request, *args, **kwargs):
+    def update(self, request):
         self.object = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
         data = {}
@@ -88,5 +90,8 @@ class PensionUserChangePassword(generics.UpdateAPIView):
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
             data['message'] = 'Password updated successfully'
-            return Response(data)
-        return Response(serializer.errors)
+        else:
+            data = serializer.errors
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_200_OK)
+

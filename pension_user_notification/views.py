@@ -49,4 +49,29 @@ class PensionNotificationReceive(APIView):
             print(notification)
         except Exception as e:
             print(e)
-        return Response(notification)
+        return Response(notification, status=status.HTTP_200_OK)
+
+
+
+# View for Display notification
+class ShowNotification(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        data ={}
+        try:
+            count = UserNotification.objects.filter(user = request.user.id).count()
+            if count > 0 :
+                data = UserNotification.objects.filter(user = request.user.id)
+                notification = []
+                
+                for item in data:
+                    notification.append(item.notification)
+
+                return Response({"user" : request.user.username, "count" : count, "Notifications" : notification}, status=status.HTTP_200_OK)
+            else:
+                data['message'] = 'No notifications to display'
+                return Response(data, status=status.HTTP_200_OK)
+        except:
+            data['message'] = 'No notifications to display'
+            return Response(data, status=status.HTTP_200_OK)
