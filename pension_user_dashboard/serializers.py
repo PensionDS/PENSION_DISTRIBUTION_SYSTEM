@@ -13,7 +13,7 @@ class UserServiceStatusSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ('id', 'DOB', 'Address', 'LGA', 'Name_of_Next_of_Kln', 'Next_of_Kln_email_address',
+        fields = ('id', 'Image', 'DOB', 'Address', 'LGA', 'Name_of_Next_of_Kln', 'Next_of_Kln_email_address',
         'Next_of_Kln_phone', 'Next_of_Kln_address')
 
 

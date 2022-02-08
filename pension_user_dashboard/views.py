@@ -63,6 +63,7 @@ class PensionUserProfile(generics.GenericAPIView):
         data['username'] = username.username
         data['email'] = username.email
         data['phone_number'] = phone_number.phone_number
+        data['Image'] = str(user.Image)
         data['DOB'] = user.DOB
         data['Address'] = user.Address
         data['LGA'] = user.LGA

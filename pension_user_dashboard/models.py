@@ -5,7 +5,13 @@ from pension_user_authentication.models import UserAccountDetails
 
 # Model for UserProfile
 class UserProfile(models.Model):
+
+# Function to automatically build file name
+    def nameFile(instance, filename):
+        return '/'.join(['Images', str(instance.user), filename])
+
     user = models.OneToOneField(User, on_delete = models.CASCADE)
+    Image = models.ImageField(upload_to = nameFile, blank = True, default = 'None')
     DOB = models.DateField(max_length = 8, null = False, blank = False)
     Address = models.TextField(null = False, blank = False)
     LGA = models.CharField(max_length = 50, null = False, blank = False)
@@ -48,3 +54,4 @@ class UserWalletDetails(models.Model):
 
     def __str__(self):
         return self.user.username
+
